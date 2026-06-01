@@ -9,4 +9,7 @@
     <Project Path="src/Fcg.Audit.Logs.Application/Fcg.Audit.Logs.Application.csproj" />
     <Project Path="src/Fcg.Audit.Logs.Worker/Fcg.Audit.Logs.Worker.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Fcg.Audit.Logs.Application.Tests/Fcg.Audit.Logs.Application.Tests.csproj" />
+  </Folder>
 </Solution>

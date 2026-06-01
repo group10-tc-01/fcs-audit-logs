@@ -20,11 +20,29 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
       - DOTNET_ENVIRONMENT=Docker
     networks:
       - fcg-audit-logs-network
     restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb-fcg-audit-logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - fcg-audit-logs-network
+    healthcheck:
+      test: mongosh --quiet --eval "db.adminCommand('ping').ok" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -80,3 +98,6 @@ services:
 networks:
   fcg-audit-logs-network:
     driver: bridge
+
+volumes:
+  mongodb-data:

@@ -1,6 +1,5 @@
-using Fcg.Audit.Logs.Application.Common.Services;
 using Fcg.Audit.Logs.Application.Common.Settings;
-using Fcg.Audit.Logs.Application.Features.SampleEvent;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,8 +10,12 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<KafkaSettings>(configuration.GetSection(KafkaSettings.SectionName));
-        services.AddHostedService<SampleEventConsumer>();
-        services.AddSingleton<SampleNotificationService>();
+        services.Configure<MongoDbSettings>(configuration.GetSection(MongoDbSettings.SectionName));
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IAuditLogRepository, MongoAuditLogRepository>();
+        services.AddSingleton<AuditLogService>();
+        services.AddHostedService<AuditLogIndexesHostedService>();
+        services.AddHostedService<AuditLogRequestedEventConsumer>();
 
         return services;
     }
