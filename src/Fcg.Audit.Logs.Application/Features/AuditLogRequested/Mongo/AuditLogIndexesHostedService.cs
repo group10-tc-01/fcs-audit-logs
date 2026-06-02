@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
 public sealed class AuditLogIndexesHostedService : IHostedService
 {

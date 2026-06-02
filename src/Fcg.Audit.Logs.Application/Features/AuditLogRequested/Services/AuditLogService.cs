@@ -1,7 +1,10 @@
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Events;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 using MongoDB.Bson;
 using System.Text.Json;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 
 public sealed class AuditLogService
 {

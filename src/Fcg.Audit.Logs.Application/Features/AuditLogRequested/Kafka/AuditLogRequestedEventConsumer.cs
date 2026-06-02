@@ -1,9 +1,12 @@
 using Fcg.Audit.Logs.Application.Common.Abstractions;
 using Fcg.Audit.Logs.Application.Common.Settings;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Events;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Kafka;
 
 public sealed class AuditLogRequestedEventConsumer : BaseKafkaConsumer<AuditLogRequestedEvent>
 {

@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
 public sealed class AuditLogDocument
 {

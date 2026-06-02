@@ -1,6 +1,8 @@
-using Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Events;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 using FluentAssertions;
-using MongoDB.Bson;
 using System.Text.Json;
 using Xunit;
 

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
 public sealed class MongoAuditLogRepository : IAuditLogRepository
 {

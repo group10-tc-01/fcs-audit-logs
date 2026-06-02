@@ -1,4 +1,4 @@
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
 public interface IAuditLogRepository
 {

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Events;
 
 public sealed record AuditLogRequestedEvent
 {

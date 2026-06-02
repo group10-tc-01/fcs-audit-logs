@@ -1,5 +1,7 @@
 using Fcg.Audit.Logs.Application.Common.Settings;
-using Fcg.Audit.Logs.Application.Features.AuditLogRequested;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Kafka;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
+using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
