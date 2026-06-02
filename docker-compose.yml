@@ -7,8 +7,6 @@ services:
     ports:
       - "5341:5341"
       - "5342:80"
-    networks:
-      - fcg-audit-logs-network
 
   fcg-audit-logs:
     build:
@@ -20,11 +18,25 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
       - DOTNET_ENVIRONMENT=Docker
-    networks:
-      - fcg-audit-logs-network
     restart: unless-stopped
+
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb-fcg-audit-logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+        test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok || quit(1)"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -34,8 +46,6 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - fcg-audit-logs-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -54,8 +64,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    networks:
-      - fcg-audit-logs-network
     healthcheck:
       test: kafka-broker-api-versions --bootstrap-server kafka:29092 || exit 1
       interval: 10s
@@ -74,9 +82,6 @@ services:
       DYNAMIC_CONFIG_ENABLED: "true"
     depends_on:
       - kafka
-    networks:
-      - fcg-audit-logs-network
 
-networks:
-  fcg-audit-logs-network:
-    driver: bridge
+volumes:
+  mongodb-data:

@@ -1,0 +1,43 @@
+name: Fcg.Audit.Logs CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - src/**
+      - tests/**
+      - Directory.Build.props
+      - Directory.Packages.props
+      - .editorconfig
+      - docker-compose.yml
+      - .github/workflows/dotnet-service-ci.yml
+  push:
+    branches: [main, develop]
+    paths:
+      - src/**
+      - tests/**
+      - Directory.Build.props
+      - Directory.Packages.props
+      - .editorconfig
+      - docker-compose.yml
+      - .github/workflows/dotnet-service-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  security-events: write
+
+jobs:
+  ci:
+    uses: group10-tc-01/fcg-pipelines/.github/workflows/dotnet-service-ci.yml@main
+    with:
+      service_name: fcg-audit-logs
+      dotnet_version: 8.0.x
+      solution_path: Fcg.Audit.Logs.slnx
+      unit_tests_path: tests/Fcg.Audit.Logs.Application.Tests/Fcg.Audit.Logs.Application.Tests.csproj
+      test_environment: Test
+      coverage_threshold: 80
+      run_sonar: false
+    secrets: inherit
