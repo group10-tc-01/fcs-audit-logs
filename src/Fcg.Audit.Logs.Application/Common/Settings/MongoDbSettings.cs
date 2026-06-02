@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Fcg.Audit.Logs.Application.Common.Settings;
 
+[ExcludeFromCodeCoverage]
 public sealed class MongoDbSettings
 {
     public const string SectionName = "MongoDbSettings";

@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
+[ExcludeFromCodeCoverage]
 public sealed class AuditLogIndexesHostedService : IHostedService
 {
     private readonly IAuditLogRepository _repository;

@@ -4,9 +4,11 @@ using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Application.DependencyInjection;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)

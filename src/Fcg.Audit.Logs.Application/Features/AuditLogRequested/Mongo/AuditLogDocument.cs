@@ -1,8 +1,10 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
+[ExcludeFromCodeCoverage]
 public sealed class AuditLogDocument
 {
     [BsonId]

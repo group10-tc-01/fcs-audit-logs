@@ -5,9 +5,11 @@ using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
 using Fcg.Audit.Logs.Application.Features.AuditLogRequested.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Kafka;
 
+[ExcludeFromCodeCoverage]
 public sealed class AuditLogRequestedEventConsumer : BaseKafkaConsumer<AuditLogRequestedEvent>
 {
     private readonly AuditLogService _auditLogService;

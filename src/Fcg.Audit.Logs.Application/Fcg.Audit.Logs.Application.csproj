@@ -7,5 +7,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Confluent.Kafka" />
     <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="SharpCompress" />
+    <PackageReference Include="Snappier" />
   </ItemGroup>
 </Project>

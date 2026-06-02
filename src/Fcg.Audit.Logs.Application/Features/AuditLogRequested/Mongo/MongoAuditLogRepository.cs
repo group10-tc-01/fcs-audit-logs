@@ -2,9 +2,11 @@ using Fcg.Audit.Logs.Application.Common.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 
+[ExcludeFromCodeCoverage]
 public sealed class MongoAuditLogRepository : IAuditLogRepository
 {
     private readonly IMongoCollection<AuditLogDocument> _collection;

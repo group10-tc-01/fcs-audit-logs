@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Fcg.Audit.Logs.Application.Features.AuditLogRequested.Events;
 
+[ExcludeFromCodeCoverage]
 public sealed record AuditLogRequestedEvent
 {
     public string? EventId { get; init; }

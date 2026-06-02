@@ -84,6 +84,200 @@ public sealed class AuditLogServiceTests
         repository.AuditLogs.Should().BeEmpty();
     }
 
+    [Theory]
+    [InlineData(null, "Audit log eventId is required.")]
+    [InlineData("", "Audit log eventId is required.")]
+    [InlineData("   ", "Audit log eventId is required.")]
+    public async Task Given_PersistAsync_Called_When_EventIdIsMissing_Then_ShouldThrowInvalidAuditLogEventException(
+        string? eventId,
+        string expectedMessage)
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with { EventId = eventId };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage(expectedMessage);
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Given_PersistAsync_Called_When_OccurredAtIsMissing_Then_ShouldThrowInvalidAuditLogEventException()
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with { OccurredAt = default };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage("Audit log occurredAt is required.");
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData(null, "Audit log serviceName is required.")]
+    [InlineData("", "Audit log serviceName is required.")]
+    [InlineData("   ", "Audit log serviceName is required.")]
+    public async Task Given_PersistAsync_Called_When_ServiceNameIsMissing_Then_ShouldThrowInvalidAuditLogEventException(
+        string? serviceName,
+        string expectedMessage)
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with { ServiceName = serviceName };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage(expectedMessage);
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData(null, "Audit log action is required.")]
+    [InlineData("", "Audit log action is required.")]
+    [InlineData("   ", "Audit log action is required.")]
+    public async Task Given_PersistAsync_Called_When_ActionIsMissing_Then_ShouldThrowInvalidAuditLogEventException(
+        string? action,
+        string expectedMessage)
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with { Action = action };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage(expectedMessage);
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData(null, "Audit log entityName is required.")]
+    [InlineData("", "Audit log entityName is required.")]
+    [InlineData("   ", "Audit log entityName is required.")]
+    public async Task Given_PersistAsync_Called_When_EntityNameIsMissing_Then_ShouldThrowInvalidAuditLogEventException(
+        string? entityName,
+        string expectedMessage)
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with { EntityName = entityName };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage(expectedMessage);
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Given_PersistAsync_Called_When_OptionalFieldsAreBlank_Then_ShouldPersistNullOptionalFields()
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with
+        {
+            EntityId = " ",
+            ActorId = "",
+            ActorType = null,
+            CorrelationId = "   ",
+            IpAddress = null,
+            UserAgent = "",
+            Metadata = null
+        };
+
+        // Act
+        await service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        var auditLog = repository.AuditLogs.Should().ContainSingle().Subject;
+        auditLog.EntityId.Should().BeNull();
+        auditLog.ActorId.Should().BeNull();
+        auditLog.ActorType.Should().BeNull();
+        auditLog.CorrelationId.Should().BeNull();
+        auditLog.IpAddress.Should().BeNull();
+        auditLog.UserAgent.Should().BeNull();
+        auditLog.Metadata.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Given_PersistAsync_Called_When_MetadataIsNotObject_Then_ShouldThrowInvalidAuditLogEventException()
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        using var metadata = JsonDocument.Parse("[1, 2, 3]");
+        var auditLogRequestedEvent = CreateValidEvent() with { Metadata = metadata.RootElement.Clone() };
+
+        // Act
+        var act = () => service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidAuditLogEventException>().WithMessage("Audit log metadata must be a JSON object when provided.");
+        repository.AuditLogs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Given_PersistAsync_Called_When_MetadataHasNestedValues_Then_ShouldPersistSupportedBsonValues()
+    {
+        // Arrange
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        using var metadata = JsonDocument.Parse("""
+            {
+              "tags": ["urgent", "audit"],
+              "approved": true,
+              "score": 10,
+              "ratio": 0.75,
+              "empty": null,
+              "nested": {
+                "value": "inside"
+              }
+            }
+            """);
+        var auditLogRequestedEvent = CreateValidEvent() with { Metadata = metadata.RootElement.Clone() };
+
+        // Act
+        await service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        var auditLog = repository.AuditLogs.Should().ContainSingle().Subject;
+        auditLog.Metadata.Should().NotBeNull();
+        auditLog.Metadata!["tags"].AsBsonArray.Select(value => value.AsString).Should().Equal("urgent", "audit");
+        auditLog.Metadata["approved"].AsBoolean.Should().BeTrue();
+        auditLog.Metadata["score"].ToInt64().Should().Be(10);
+        auditLog.Metadata["ratio"].ToDouble().Should().Be(0.75);
+        auditLog.Metadata["empty"].IsBsonNull.Should().BeTrue();
+        auditLog.Metadata["nested"].AsBsonDocument["value"].AsString.Should().Be("inside");
+    }
+
+    private static AuditLogRequestedEvent CreateValidEvent()
+    {
+        return new AuditLogRequestedEvent
+        {
+            EventId = "event-1",
+            OccurredAt = new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero),
+            ServiceName = "fcg-donations",
+            Action = "DonationRequested",
+            EntityName = "Donation"
+        };
+    }
+
     private sealed class InMemoryAuditLogRepository : IAuditLogRepository
     {
         public List<AuditLogDocument> AuditLogs { get; } = [];

@@ -1,8 +1,10 @@
 using Fcg.Audit.Logs.Application.DependencyInjection;
 using Serilog;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fcg.Audit.Logs.Worker;
 
+[ExcludeFromCodeCoverage]
 public class Program
 {
     protected Program() { }

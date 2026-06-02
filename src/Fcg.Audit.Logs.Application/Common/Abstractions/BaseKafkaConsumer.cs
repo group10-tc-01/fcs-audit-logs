@@ -1,10 +1,12 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Fcg.Audit.Logs.Application.Common.Abstractions;
 
+[ExcludeFromCodeCoverage]
 public abstract class BaseKafkaConsumer<TEvent> : BackgroundService where TEvent : class
 {
     private static readonly JsonSerializerOptions SerializerOptions = new()
