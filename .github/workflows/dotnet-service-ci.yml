@@ -1,3 +1,4 @@
+# repos renamed: fcg -> fcs
 name: fcs.Audit.Logs CI
 
 on:
