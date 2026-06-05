@@ -6,10 +6,10 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/fcs.Audit.Logs.Application/fcs.Audit.Logs.Application.csproj" />
-    <Project Path="src/fcs.Audit.Logs.Worker/fcs.Audit.Logs.Worker.csproj" />
+    <Project Path="src/Fcs.Audit.Logs.Application/Fcs.Audit.Logs.Application.csproj" />
+    <Project Path="src/Fcs.Audit.Logs.Worker/Fcs.Audit.Logs.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/fcs.Audit.Logs.Application.Tests/fcs.Audit.Logs.Application.Tests.csproj" />
+    <Project Path="tests/Fcs.Audit.Logs.Application.Tests/Fcs.Audit.Logs.Application.Tests.csproj" />
   </Folder>
 </Solution>

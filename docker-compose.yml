@@ -11,7 +11,7 @@ services:
   fcs-audit-logs:
     build:
       context: .
-      dockerfile: src/fcs.Audit.Logs.Worker/Dockerfile
+      dockerfile: src/Fcs.Audit.Logs.Worker/Dockerfile
     container_name: fcs-audit-logs
     depends_on:
       seq:
