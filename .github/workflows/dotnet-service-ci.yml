@@ -36,8 +36,8 @@ jobs:
     with:
       service_name: fcs-audit-logs
       dotnet_version: 8.0.x
-      solution_path: fcs.Audit.Logs.slnx
-      unit_tests_path: tests/fcs.Audit.Logs.Application.Tests/fcs.Audit.Logs.Application.Tests.csproj
+       solution_path: Fcs.Audit.Logs.slnx
+       unit_tests_path: tests/Fcs.Audit.Logs.Application.Tests/Fcs.Audit.Logs.Application.Tests.csproj
       test_environment: Test
       coverage_threshold: 80
       run_sonar: false
