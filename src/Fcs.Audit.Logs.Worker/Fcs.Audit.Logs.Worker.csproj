@@ -8,7 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\fcs.Audit.Logs.Application\fcs.Audit.Logs.Application.csproj" />
+    <ProjectReference Include="..\Fcs.Audit.Logs.Application\Fcs.Audit.Logs.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

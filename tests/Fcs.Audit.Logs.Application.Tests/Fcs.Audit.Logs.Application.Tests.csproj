@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\fcs.Audit.Logs.Application\fcs.Audit.Logs.Application.csproj" />
+    <ProjectReference Include="..\..\src\Fcs.Audit.Logs.Application\Fcs.Audit.Logs.Application.csproj" />
   </ItemGroup>
 </Project>
