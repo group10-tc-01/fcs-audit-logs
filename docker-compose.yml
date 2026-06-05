@@ -1,18 +1,18 @@
 services:
   seq:
     image: datalust/seq:latest
-    container_name: seq-fcg-audit-logs
+    container_name: seq-fcs-audit-logs
     environment:
       - ACCEPT_EULA=Y
     ports:
       - "5341:5341"
       - "5342:80"
 
-  fcg-audit-logs:
+  fcs-audit-logs:
     build:
       context: .
-      dockerfile: src/Fcg.Audit.Logs.Worker/Dockerfile
-    container_name: fcg-audit-logs
+      dockerfile: src/fcs.Audit.Logs.Worker/Dockerfile
+    container_name: fcs-audit-logs
     depends_on:
       seq:
         condition: service_started
@@ -26,7 +26,7 @@ services:
 
   mongodb:
     image: mongo:8.0
-    container_name: mongodb-fcg-audit-logs
+    container_name: mongodb-fcs-audit-logs
     ports:
       - "27017:27017"
     volumes:
@@ -40,7 +40,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper-fcg-audit-logs
+    container_name: zookeeper-fcs-audit-logs
     ports:
       - "2181:2181"
     environment:
@@ -49,7 +49,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka-fcg-audit-logs
+    container_name: kafka-fcs-audit-logs
     depends_on:
       - zookeeper
     ports:
@@ -73,7 +73,7 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui-fcg-audit-logs
+    container_name: kafka-ui-fcs-audit-logs
     ports:
       - "8081:8080"
     environment:

@@ -1,4 +1,4 @@
-name: Fcg.Audit.Logs CI
+name: fcs.Audit.Logs CI
 
 on:
   pull_request:
@@ -31,12 +31,12 @@ permissions:
 
 jobs:
   ci:
-    uses: group10-tc-01/fcg-pipelines/.github/workflows/dotnet-service-ci.yml@main
+    uses: group10-tc-01/fcs-pipelines/.github/workflows/dotnet-service-ci.yml@main
     with:
-      service_name: fcg-audit-logs
+      service_name: fcs-audit-logs
       dotnet_version: 8.0.x
-      solution_path: Fcg.Audit.Logs.slnx
-      unit_tests_path: tests/Fcg.Audit.Logs.Application.Tests/Fcg.Audit.Logs.Application.Tests.csproj
+      solution_path: fcs.Audit.Logs.slnx
+      unit_tests_path: tests/fcs.Audit.Logs.Application.Tests/fcs.Audit.Logs.Application.Tests.csproj
       test_environment: Test
       coverage_threshold: 80
       run_sonar: false

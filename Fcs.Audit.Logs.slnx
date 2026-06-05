@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/fcs.Audit.Logs.Application/fcs.Audit.Logs.Application.csproj" />
+    <Project Path="src/fcs.Audit.Logs.Worker/fcs.Audit.Logs.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/fcs.Audit.Logs.Application.Tests/fcs.Audit.Logs.Application.Tests.csproj" />
+  </Folder>
+</Solution>
