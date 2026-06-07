@@ -10,6 +10,6 @@
     <Project Path="src/Fcs.Audit.Logs.Worker/Fcs.Audit.Logs.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Fcs.Audit.Logs.Application.Tests/Fcs.Audit.Logs.UnitTests.csproj" />
+    <Project Path="tests/Fcs.Audit.Logs.UnitTests/Fcs.Audit.Logs.UnitTests.csproj" />
   </Folder>
 </Solution>
