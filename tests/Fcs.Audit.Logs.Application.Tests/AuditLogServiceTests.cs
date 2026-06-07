@@ -6,7 +6,7 @@ using FluentAssertions;
 using System.Text.Json;
 using Xunit;
 
-namespace fcs.Audit.Logs.Application.Tests;
+namespace Fcs.Audit.Logs.UnitTests;
 
 public sealed class AuditLogServiceTests
 {
