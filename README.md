@@ -259,17 +259,37 @@ A esteira fica em `.github/workflows/` reutilizando os workflows reutilizáveis 
 
 - `branch-name-check.yml` - política de nomes de branch
 - `dotnet-service-ci.yml` - build .NET, testes, SonarCloud, Trivy, build da imagem Docker
-- `dotnet-service-delivery.yml` - push da imagem para Azure Container Registry e deploy em AKS
+- `dotnet-service-delivery.yml` - entrega da imagem imutável no K3s da VPS por runner GitHub hospedado, através de túnel SSH privado para a API K3s
 
-Gates principais: secret scan (Gitleaks), dependency scan, restore/build, testes com cobertura mínima de 80%, SonarCloud, Docker build, Trivy, deploy condicional, healthcheck pós-rollout.
+Gates principais: secret scan (Gitleaks), dependency scan, restore/build, testes com cobertura mínima de 80%, Docker build, Trivy, deploy condicional, rollout e healthcheck pós-deploy.
 
 ---
 
 ## Kubernetes
 
-Manifests Kubernetes deste worker (Deployment, Service, ConfigMap, Secret) ficam em `k8s/` (ou diretório equivalente neste repositório). Para o ambiente integrado (Kind local ou AKS), com Kafka, MongoDB, Prometheus e Grafana compartilhados, consulte o repositório `fcs-solidarity-infra` ([ADR 0026](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0026-use-separated-kubernetes-namespaces.md)).
+O `k8s/kustomization.yaml` aplica todos os recursos proprietários do worker: Deployment, ConfigMap, Service, RBAC, Ingress HTTPS, Certificate e o `InfisicalStaticSecret` que gera `audit-logs-runtime`. Os recursos compartilhados (Traefik, cert-manager, Infisical Operator, Kafka, MongoDB e namespaces) são gerenciados pelo `fcs-infra`; valores de produção não são versionados neste repositório ([ADR 0026](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0026-use-separated-kubernetes-namespaces.md)).
 
 Namespace alvo: `fcs-audit-logs`.
+Ele é criado e mantido pelo `fcs-infra`; por isso o Kustomize da aplicação não tenta recriá-lo.
+
+Os caminhos públicos da VPS são:
+
+- `https://fcs-audit-logs.flaviojcf.com.br/health`
+- `https://fcs-audit-logs.flaviojcf.com.br/metrics`
+
+### Secrets e variables do deploy
+
+Configure os secrets no repositório GitHub. O environment `production` continua sendo o gate de aprovação do deploy:
+
+| Tipo | Nome | Uso |
+|---|---|---|
+| Secret | `K3S_KUBECONFIG` | Kubeconfig capaz de aplicar os recursos do namespace. No primeiro deploy, use o kubeconfig administrativo do K3s; depois, rotacione para uma credencial limitada ao namespace. |
+| Secret | `VPS_DEPLOY_SSH_KEY` | Chave privada do usuário `fcs-vps-deployer` para abrir o túnel. |
+| Secret | `VPS_KNOWN_HOSTS` | Host key da VPS obtida por canal confiável. |
+| Variable | `VPS_HOST` | IP ou hostname da VPS. |
+| Variable | `VPS_DEPLOY_USER` | `fcs-infra-deployer`. |
+
+O Infisical usa o projeto `fcs-platform-dd-uk`, ambiente `prod`, path `/platform`. O Operator instalado pelo `fcs-infra` sincroniza o Secret Kubernetes `audit-logs-runtime`, que hoje contém a connection string interna do MongoDB compartilhado: `mongodb-service.fcs-infra.svc.cluster.local:27017`.
 
 ---
 

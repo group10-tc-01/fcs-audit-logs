@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fcs-audit-logs-operational
+  namespace: fcs-audit-logs
+spec:
+  ingressClassName: fcs-traefik
+  tls:
+    - hosts:
+        - fcs-audit-logs.flaviojcf.com.br
+      secretName: fcs-audit-logs-tls
+  rules:
+    - host: fcs-audit-logs.flaviojcf.com.br
+      http:
+        paths:
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: fcs-audit-logs-service
+                port:
+                  number: 8080
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: fcs-audit-logs-service
+                port:
+                  number: 8080
