@@ -4,24 +4,10 @@ name: fcs.Audit.Logs CI
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - src/**
-      - tests/**
-      - Directory.Build.props
-      - Directory.Packages.props
-      - .editorconfig
-      - docker-compose.yml
-      - .github/workflows/dotnet-service-ci.yml
+    
   push:
     branches: [main, develop]
-    paths:
-      - src/**
-      - tests/**
-      - Directory.Build.props
-      - Directory.Packages.props
-      - .editorconfig
-      - docker-compose.yml
-      - .github/workflows/dotnet-service-ci.yml
+    
   workflow_dispatch:
 
 permissions:
