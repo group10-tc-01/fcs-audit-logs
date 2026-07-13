@@ -1,5 +1,6 @@
 using fcs.Audit.Logs.Application.DependencyInjection;
 using fcs.Audit.Logs.Application.Common.Settings;
+using fcs.Audit.Logs.Application.Observability;
 using fcs.Audit.Logs.Worker.Observability;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Driver;
@@ -77,6 +78,7 @@ public class Program
             {
                 tracing
                     .SetResourceBuilder(resourceBuilder)
+                    .AddSource(AuditLogsTelemetry.ActivitySourceName)
                     .AddAspNetCoreInstrumentation(opts =>
                     {
                         opts.Filter = httpContext =>

@@ -1,7 +1,9 @@
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Events;
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
+using fcs.Audit.Logs.Application.Observability;
 using MongoDB.Bson;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace fcs.Audit.Logs.Application.Features.AuditLogRequested.Services;
@@ -21,26 +23,55 @@ public sealed class AuditLogService
 
     public async Task PersistAsync(AuditLogRequestedEvent @event, CancellationToken cancellationToken)
     {
-        Validate(@event);
+        using var activity = AuditLogsTelemetry.ActivitySource.StartActivity("audit-log persist", ActivityKind.Consumer);
 
-        var auditLog = new AuditLogDocument
+        SetActivityTags(activity, @event);
+
+        try
         {
-            EventId = @event.EventId!.Trim(),
-            OccurredAt = @event.OccurredAt.UtcDateTime,
-            ReceivedAt = _timeProvider.GetUtcNow().UtcDateTime,
-            ServiceName = @event.ServiceName!.Trim(),
-            Action = @event.Action!.Trim(),
-            EntityName = @event.EntityName!.Trim(),
-            EntityId = NormalizeOptional(@event.EntityId),
-            ActorId = NormalizeOptional(@event.ActorId),
-            ActorType = NormalizeOptional(@event.ActorType),
-            CorrelationId = NormalizeOptional(@event.CorrelationId),
-            IpAddress = NormalizeOptional(@event.IpAddress),
-            UserAgent = NormalizeOptional(@event.UserAgent),
-            Metadata = BuildMetadata(@event.Metadata)
-        };
+            Validate(@event);
 
-        await _repository.InsertAsync(auditLog, cancellationToken);
+            var auditLog = new AuditLogDocument
+            {
+                EventId = @event.EventId!.Trim(),
+                OccurredAt = @event.OccurredAt.UtcDateTime,
+                ReceivedAt = _timeProvider.GetUtcNow().UtcDateTime,
+                ServiceName = @event.ServiceName!.Trim(),
+                Action = @event.Action!.Trim(),
+                EntityName = @event.EntityName!.Trim(),
+                EntityId = NormalizeOptional(@event.EntityId),
+                ActorId = NormalizeOptional(@event.ActorId),
+                ActorType = NormalizeOptional(@event.ActorType),
+                CorrelationId = NormalizeOptional(@event.CorrelationId),
+                IpAddress = NormalizeOptional(@event.IpAddress),
+                UserAgent = NormalizeOptional(@event.UserAgent),
+                Metadata = BuildMetadata(@event.Metadata)
+            };
+
+            await _repository.InsertAsync(auditLog, cancellationToken);
+            activity?.SetStatus(ActivityStatusCode.Ok);
+        }
+        catch (Exception exception)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, exception.Message);
+            throw;
+        }
+    }
+
+    private static void SetActivityTags(Activity? activity, AuditLogRequestedEvent @event)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("messaging.system", "kafka");
+        activity.SetTag("messaging.destination.name", AuditLogsTelemetry.AuditLogRequestedTopic);
+        activity.SetTag("messaging.operation", "process");
+        activity.SetTag("audit.event_id", @event.EventId?.Trim());
+        activity.SetTag("audit.source_service", @event.ServiceName?.Trim());
+        activity.SetTag("audit.action", @event.Action?.Trim());
+        activity.SetTag("audit.entity_name", @event.EntityName?.Trim());
     }
 
     private static void Validate(AuditLogRequestedEvent @event)

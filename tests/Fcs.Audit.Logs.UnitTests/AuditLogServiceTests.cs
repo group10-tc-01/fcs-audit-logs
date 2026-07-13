@@ -2,7 +2,9 @@ using fcs.Audit.Logs.Application.Features.AuditLogRequested.Events;
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Exceptions;
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Mongo;
 using fcs.Audit.Logs.Application.Features.AuditLogRequested.Services;
+using fcs.Audit.Logs.Application.Observability;
 using FluentAssertions;
+using System.Diagnostics;
 using System.Text.Json;
 using Xunit;
 
@@ -264,6 +266,54 @@ public sealed class AuditLogServiceTests
         auditLog.Metadata["ratio"].ToDouble().Should().Be(0.75);
         auditLog.Metadata["empty"].IsBsonNull.Should().BeTrue();
         auditLog.Metadata["nested"].AsBsonDocument["value"].AsString.Should().Be("inside");
+    }
+
+    [Fact]
+    public void Given_AuditLogsTelemetry_When_ActivitySourceIsUsed_Then_ShouldExposeStableSourceName()
+    {
+        // Act & Assert
+        AuditLogsTelemetry.ActivitySourceName.Should().Be("Fcs.Audit.Logs");
+        AuditLogsTelemetry.ActivitySource.Name.Should().Be(AuditLogsTelemetry.ActivitySourceName);
+    }
+
+    [Fact]
+    public async Task Given_PersistAsync_Called_When_ActivityListenerIsRegistered_Then_ShouldCreateAuditProcessingSpan()
+    {
+        // Arrange
+        var activities = new List<Activity>();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == AuditLogsTelemetry.ActivitySourceName,
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStopped = activity => activities.Add(activity)
+        };
+        ActivitySource.AddActivityListener(listener);
+
+        var repository = new InMemoryAuditLogRepository();
+        var service = new AuditLogService(repository, TimeProvider.System);
+        var auditLogRequestedEvent = CreateValidEvent() with
+        {
+            EventId = "event-42",
+            ServiceName = "fcs-identity",
+            Action = "DonorRegistered",
+            EntityName = "DonorProfile"
+        };
+
+        // Act
+        await service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
+
+        // Assert
+        var activity = activities.Should().ContainSingle().Subject;
+        activity.OperationName.Should().Be("audit-log persist");
+        activity.Kind.Should().Be(ActivityKind.Consumer);
+        activity.Status.Should().Be(ActivityStatusCode.Ok);
+        activity.GetTagItem("audit.event_id").Should().Be("event-42");
+        activity.GetTagItem("audit.source_service").Should().Be("fcs-identity");
+        activity.GetTagItem("audit.action").Should().Be("DonorRegistered");
+        activity.GetTagItem("audit.entity_name").Should().Be("DonorProfile");
+        activity.GetTagItem("messaging.system").Should().Be("kafka");
+        activity.GetTagItem("messaging.destination.name").Should().Be("audit-log-requested");
+        activity.GetTagItem("messaging.operation").Should().Be("process");
     }
 
     private static AuditLogRequestedEvent CreateValidEvent()
