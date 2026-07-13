@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fcs-audit-logs-tls
+  namespace: fcs-audit-logs
+spec:
+  secretName: fcs-audit-logs-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
+  dnsNames:
+    - fcs-audit-logs.flaviojcf.com.br

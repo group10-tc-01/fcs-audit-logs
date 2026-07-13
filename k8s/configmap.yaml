@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-logs-config
+  namespace: fcs-audit-logs
+data:
+  DOTNET_ENVIRONMENT: Production
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://+:8080
+  KafkaSettings__BootstrapServers: kafka-service.fcs-infra.svc.cluster.local:29092
+  KafkaSettings__GroupId: fcs-audit-logs-consumer-group
+  KafkaSettings__ConsumerTimeoutMs: "100"
+  KafkaSettings__Topics__AuditLogRequested: audit-log-requested
+  MongoDbSettings__DatabaseName: AuditLogsDb
+  MongoDbSettings__CollectionName: audit_logs
+  Observability__ServiceName: Fcs.Audit.Logs
+  Observability__EnableOtlpExporter: "false"
+  Observability__OtlpEndpoint: ""
+  Observability__OtlpAuthHeader: ""

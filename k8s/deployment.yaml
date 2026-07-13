@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fcs-audit-logs
+  namespace: fcs-audit-logs
+  labels:
+    app.kubernetes.io/name: fcs-audit-logs
+    app.kubernetes.io/part-of: fcs
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fcs-audit-logs
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fcs-audit-logs
+        app.kubernetes.io/part-of: fcs
+        tags.datadoghq.com/service: fcs-audit-logs
+        tags.datadoghq.com/env: production
+      annotations:
+        fcs.platform/deployed-at: not-deployed
+        fcs.platform/source-sha: not-deployed
+        fcs.platform/image: not-deployed
+        ad.datadoghq.com/worker.checks: |
+          {
+            "openmetrics": {
+              "init_config": {},
+              "instances": [
+                {
+                  "openmetrics_endpoint": "http://%%host%%:%%port%%/metrics",
+                  "namespace": "fcs_audit_logs",
+                  "metrics": [".*"]
+                }
+              ]
+            },
+            "http_check": {
+              "init_config": {},
+              "instances": [
+                {
+                  "name": "fcs-audit-logs-health",
+                  "url": "http://%%host%%:%%port%%/health",
+                  "timeout": 5,
+                  "collect_response_time": true
+                }
+              ]
+            }
+          }
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/group10-tc-01/fcs-audit-logs:main
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: audit-logs-config
+          env:
+            - name: MongoDbSettings__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: audit-logs-runtime
+                  key: MongoDbSettings__ConnectionString
+            - name: Deployment__DeployedAt
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['fcs.platform/deployed-at']
+            - name: Deployment__SourceSha
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['fcs.platform/source-sha']
+            - name: Deployment__Image
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['fcs.platform/image']
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
