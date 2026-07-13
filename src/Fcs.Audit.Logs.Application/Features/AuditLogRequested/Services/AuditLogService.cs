@@ -48,7 +48,12 @@ public sealed class AuditLogService
                 Metadata = BuildMetadata(@event.Metadata)
             };
 
-            await _repository.InsertAsync(auditLog, cancellationToken);
+            using (var mongoActivity = AuditLogsTelemetry.StartMongoInsertActivity(auditLog.EventId))
+            {
+                await _repository.InsertAsync(auditLog, cancellationToken);
+                mongoActivity?.SetStatus(ActivityStatusCode.Ok);
+            }
+
             activity?.SetStatus(ActivityStatusCode.Ok);
         }
         catch (Exception exception)

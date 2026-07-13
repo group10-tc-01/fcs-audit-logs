@@ -303,17 +303,26 @@ public sealed class AuditLogServiceTests
         await service.PersistAsync(auditLogRequestedEvent, CancellationToken.None);
 
         // Assert
-        var activity = activities.Should().ContainSingle().Subject;
-        activity.OperationName.Should().Be("audit-log persist");
-        activity.Kind.Should().Be(ActivityKind.Consumer);
-        activity.Status.Should().Be(ActivityStatusCode.Ok);
-        activity.GetTagItem("audit.event_id").Should().Be("event-42");
-        activity.GetTagItem("audit.source_service").Should().Be("fcs-identity");
-        activity.GetTagItem("audit.action").Should().Be("DonorRegistered");
-        activity.GetTagItem("audit.entity_name").Should().Be("DonorProfile");
-        activity.GetTagItem("messaging.system").Should().Be("kafka");
-        activity.GetTagItem("messaging.destination.name").Should().Be("audit-log-requested");
-        activity.GetTagItem("messaging.operation").Should().Be("process");
+        var persistActivity = activities.Should().Contain(activity => activity.OperationName == "audit-log persist").Subject;
+        persistActivity.Kind.Should().Be(ActivityKind.Consumer);
+        persistActivity.Status.Should().Be(ActivityStatusCode.Ok);
+        persistActivity.GetTagItem("audit.event_id").Should().Be("event-42");
+        persistActivity.GetTagItem("audit.source_service").Should().Be("fcs-identity");
+        persistActivity.GetTagItem("audit.action").Should().Be("DonorRegistered");
+        persistActivity.GetTagItem("audit.entity_name").Should().Be("DonorProfile");
+        persistActivity.GetTagItem("messaging.system").Should().Be("kafka");
+        persistActivity.GetTagItem("messaging.destination.name").Should().Be("audit-log-requested");
+        persistActivity.GetTagItem("messaging.operation").Should().Be("process");
+
+        var mongoActivity = activities.Should().Contain(activity => activity.OperationName == "mongodb audit_logs insert").Subject;
+        mongoActivity.ParentSpanId.Should().Be(persistActivity.SpanId);
+        mongoActivity.Kind.Should().Be(ActivityKind.Client);
+        mongoActivity.Status.Should().Be(ActivityStatusCode.Ok);
+        mongoActivity.GetTagItem("db.system").Should().Be("mongodb");
+        mongoActivity.GetTagItem("db.name").Should().Be("AuditLogsDb");
+        mongoActivity.GetTagItem("db.collection.name").Should().Be("audit_logs");
+        mongoActivity.GetTagItem("db.operation").Should().Be("insert");
+        mongoActivity.GetTagItem("audit.event_id").Should().Be("event-42");
     }
 
     private static AuditLogRequestedEvent CreateValidEvent()
