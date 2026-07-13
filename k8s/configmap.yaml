@@ -14,6 +14,6 @@ data:
   MongoDbSettings__DatabaseName: AuditLogsDb
   MongoDbSettings__CollectionName: audit_logs
   Observability__ServiceName: Fcs.Audit.Logs
-  Observability__EnableOtlpExporter: "false"
-  Observability__OtlpEndpoint: ""
+  Observability__EnableOtlpExporter: "true"
+  Observability__OtlpEndpoint: http://otel-collector-service.fcs-infra.svc.cluster.local:4318
   Observability__OtlpAuthHeader: ""
