@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fcs-audit-logs
+  title: FCS Audit Logs
+  description: Consumidor de auditoria que persiste eventos de negócio no MongoDB.
+  annotations:
+    github.com/project-slug: group10-tc-01/fcs-audit-logs
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-id: fcs-audit-logs
+    backstage.io/kubernetes-namespace: fcs-audit-logs
+  links:
+    - title: Datadog
+      url: https://us5.datadoghq.com/metric/explorer?query=service%3Afcs-audit-logs
+      icon: dashboard
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/fcs-team
+  system: conexao-solidaria
+  dependsOn:
+    - resource:default/kafka
+    - resource:default/mongodb

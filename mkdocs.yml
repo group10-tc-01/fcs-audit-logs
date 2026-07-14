@@ -1,0 +1,5 @@
+site_name: FCS Audit Logs
+nav:
+  - Início: index.md
+plugins:
+  - techdocs-core
