@@ -2,7 +2,7 @@
 
 Worker de **Auditoria Centralizada** da plataforma **Conexão Solidária**. Consome eventos explícitos de auditoria publicados pelas aplicações no Kafka e persiste os registros em MongoDB.
 
-> Microsserviço que compõe o MVP da Conexão Solidária junto a `fcs-identity`, `fcs-campaigns`, `fcs-donations`, `fcs-donation-worker`, `fcs-solidarity-web` e `fcs-solidarity-infra`.
+> Microsserviço que compõe o MVP da Conexão Solidária junto a `fcs-identity`, `fcs-campaign`, `fcs-donations`, `fcs-donation-worker`, `fcs-bff`, `fcs-web` e `fcs-infra`.
 
 ---
 
@@ -24,32 +24,30 @@ Referências diretas:
 
 - [Visão geral da arquitetura](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/architecture/overview.md)
 - [Modelo de banco de dados](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/architecture/database-model.md)
-- [Endpoints consolidados](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/architecture/endpoints.md)
 - [Fluxos dos endpoints e workers](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/architecture/endpoint-flows.md)
 
 ADRs relevantes:
 
-- [ADR 0030 - Auditoria explícita centralizada](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0030-use-explicit-business-audit-logs.md)
-- [ADR 0018 - Kafka dentro do Kubernetes](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0018-run-kafka-inside-kubernetes.md)
-- [ADR 0023 - Estrutura interna .NET da fase 04](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0023-use-phase-04-dotnet-service-structure.md)
-- [ADR 0026 - Namespaces Kubernetes separados](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0026-use-separated-kubernetes-namespaces.md)
+- [ADR 0023 - Auditoria explícita centralizada](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0023-use-explicit-business-audit-logs.md)
+- [ADR 0014 - Kafka dentro do Kubernetes](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0014-run-kafka-inside-kubernetes.md)
+- [ADR 0019 - Estrutura interna .NET da fase 04](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0019-use-phase-04-dotnet-service-structure.md)
+- [ADR 0022 - Namespaces Kubernetes separados](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0022-use-separated-kubernetes-namespaces.md)
 
 ---
 
 ## Fluxo de Auditoria
 
-```text
-fcs-identity
-fcs-campaigns
-fcs-donations
-fcs-donation-worker
-        |
-        | Kafka topic audit-log-requested
-        v
-fcs-audit-logs
-        |
-        v
-MongoDB AuditLogsDb.audit_logs
+```mermaid
+sequenceDiagram
+    participant Service as Serviço de origem
+    participant Kafka as Kafka audit-log-requested
+    participant Worker as fcs-audit-logs
+    participant Mongo as MongoDB AuditLogsDb
+    Service->>Kafka: Publicar AuditLogRequestedEvent
+    Kafka->>Worker: Consumir evento
+    Worker->>Worker: Validar e sanitizar metadata
+    Worker->>Mongo: Persistir audit_logs por eventId
+    Worker->>Kafka: Confirmar offset
 ```
 
 Regras importantes:
@@ -124,7 +122,7 @@ tests/
   fcs.Audit.Logs.Application.Tests/
 ```
 
-Estrutura interna alinhada ao padrão da fase 04 ([ADR 0023](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0023-use-phase-04-dotnet-service-structure.md)).
+Estrutura interna alinhada ao padrão da fase 04 ([ADR 0019](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0019-use-phase-04-dotnet-service-structure.md)).
 
 ---
 
@@ -168,7 +166,7 @@ Documento persistido:
 
 ## Pré-requisitos
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker](https://docs.docker.com/get-docker/) e Docker Compose
 - Portas livres no host: `9092` (Kafka), `8081` (Kafka UI), `27017` (MongoDB), `5341` (Seq).
 
@@ -176,7 +174,7 @@ Documento persistido:
 
 ## Subindo o Ambiente Local
 
-O `docker-compose.yml` deste repositório sobe apenas as dependências deste worker (Kafka, Kafka UI, MongoDB, Seq) e, opcionalmente, o próprio worker. Para o ambiente completo integrado da Conexão Solidária utilize o repositório `fcs-solidarity-infra`.
+O `docker-compose.yml` deste repositório sobe apenas as dependências deste worker (Kafka, Kafka UI, MongoDB, Seq) e, opcionalmente, o próprio worker. Para o ambiente completo integrado da Conexão Solidária utilize o repositório `fcs-infra`.
 
 ### 1. Subir dependências
 
@@ -237,7 +235,7 @@ dotnet test
 dotnet test tests/fcs.Audit.Logs.Application.Tests
 ```
 
-Cobertura mínima exigida pela esteira: **80%** ([ADR 0025](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0025-test-strategy-for-apis-and-worker.md)).
+Cobertura mínima exigida pela esteira: **80%** ([ADR 0021](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0021-test-strategy-for-apis-and-worker.md)).
 
 ---
 
@@ -249,13 +247,13 @@ Cobertura mínima exigida pela esteira: **80%** ([ADR 0025](https://github.com/g
   - `/health`
   - `/metrics`
 
-Esses endpoints **não** são publicados no Azure API Management ([ADR 0027](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0027-keep-internal-apis-cluster-private.md)). Em ambiente local são consumidos pelo `Prometheus`/`Grafana` que rodam em `fcs-solidarity-infra`.
+Os endpoints operacionais são expostos pelo Ingress quando necessário; endpoints internos usam Services e DNS do Kubernetes, conforme a [visão geral da arquitetura](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/architecture/overview.md). A telemetria é coletada pelo Datadog no `fcs-infra`.
 
 ---
 
 ## CI/CD
 
-A esteira fica em `.github/workflows/` reutilizando os workflows reutilizáveis do repositório `fcs-pipelines` ([ADR 0022](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0022-reuse-fcs-pipelines-for-ci-cd.md)):
+A esteira fica em `.github/workflows/` reutilizando os workflows reutilizáveis do repositório `fcs-pipelines` ([ADR 0018](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0018-reuse-fcs-pipelines-for-ci-cd.md)):
 
 - `branch-name-check.yml` - política de nomes de branch
 - `dotnet-service-ci.yml` - build .NET, testes, SonarCloud, Trivy, build da imagem Docker
@@ -267,7 +265,7 @@ Gates principais: secret scan (Gitleaks), dependency scan, restore/build, testes
 
 ## Kubernetes
 
-O `k8s/kustomization.yaml` aplica todos os recursos proprietários do worker: Deployment, ConfigMap, Service, RBAC, Ingress HTTPS, Certificate e o `InfisicalStaticSecret` que gera `audit-logs-runtime`. Os recursos compartilhados (Traefik, cert-manager, Infisical Operator, Kafka, MongoDB e namespaces) são gerenciados pelo `fcs-infra`; valores de produção não são versionados neste repositório ([ADR 0026](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0026-use-separated-kubernetes-namespaces.md)).
+O `k8s/kustomization.yaml` aplica todos os recursos proprietários do worker: Deployment, ConfigMap, Service, RBAC, Ingress HTTPS, Certificate e o `InfisicalStaticSecret` que gera `audit-logs-runtime`. Os recursos compartilhados são gerenciados pelo `fcs-infra`; valores de produção não são versionados neste repositório ([ADR 0022](https://github.com/group10-tc-01/fcs-fase05-docs/blob/main/adr/0022-use-separated-kubernetes-namespaces.md)).
 
 Namespace alvo: `fcs-audit-logs`.
 Ele é criado e mantido pelo `fcs-infra`; por isso o Kustomize da aplicação não tenta recriá-lo.
