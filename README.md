@@ -2,7 +2,7 @@
 
 Worker de **Auditoria Centralizada** da plataforma **Conexão Solidária**. Consome eventos explícitos de auditoria publicados pelas aplicações no Kafka e persiste os registros em MongoDB.
 
-> Microsserviço que compõe o MVP da Conexão Solidária junto a `fcs-identity`, `fcs-campaign`, `fcs-donations`, `fcs-donation-worker`, `fcs-bff`, `fcs-web` e `fcs-infra`.
+> Microsserviço que compõe o MVP da Conexão Solidária junto a `fcs-identity`, `fcs-campaign`, `fcs-donations`, `fcs-donation-worker`, `fcs-notifications`, `fcs-bff`, `fcs-web` e `fcs-infra`.
 
 ---
 
