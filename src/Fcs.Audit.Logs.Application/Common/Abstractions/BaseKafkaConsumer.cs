@@ -135,14 +135,12 @@ public abstract class BaseKafkaConsumer<TEvent> : BackgroundService where TEvent
 
     private static ActivityContext GetParentContext(Headers? headers)
     {
-        var traceParent = headers?.GetLastBytes("traceparent");
-
-        if (traceParent is null)
+        if (headers is null || !headers.TryGetLastBytes("traceparent", out var traceParent) || traceParent is null)
         {
             return default;
         }
 
-        var traceState = headers?.GetLastBytes("tracestate");
+        headers.TryGetLastBytes("tracestate", out var traceState);
         return ActivityContext.TryParse(
             Encoding.UTF8.GetString(traceParent),
             traceState is null ? null : Encoding.UTF8.GetString(traceState),
