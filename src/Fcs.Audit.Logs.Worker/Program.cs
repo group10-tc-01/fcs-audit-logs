@@ -136,9 +136,10 @@ public class Program
         {
             loggerConfiguration
                 .ReadFrom.Configuration(configuration)
-                .ReadFrom.Services(serviceProvider)
-                .Enrich.FromLogContext()
-                .Enrich.WithProperty("Application", options.ServiceName)
+            .ReadFrom.Services(serviceProvider)
+            .Enrich.FromLogContext()
+            .Enrich.With<TraceContextEnricher>()
+            .Enrich.WithProperty("Application", options.ServiceName)
                 .Enrich.WithProperty("Environment", environment)
                 .WriteTo.Console();
 
